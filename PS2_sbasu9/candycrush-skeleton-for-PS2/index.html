@@ -1,0 +1,284 @@
+<!--
+CandyCrush
+Your Name: Siddharth Basu 
+Collaborators: N/A
+References/Sources:  http://stackoverflow.com/questions/14643617/create-table-using-javascript
+                     https://developer.mozilla.org/en-US/docs/Web/API/Node/replaceChild
+-->
+<!DOCTYPE html>
+<html>
+<!--
+/* Copyright (c) 2017 MIT 6.813/6.831 course staff, all rights reserved.
+ * Redistribution of original or derived work requires permission of course staff.
+ */
+-->
+
+<head>
+<meta charset="utf-8">
+<title>CandyCrush</title>
+
+<!-- Load style sheets -->
+<link rel="stylesheet" href=
+  "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css">
+
+<link rel="stylesheet" href="mainLayout.css">
+
+<!-- Use mobile-aware viewport -->
+<meta name="viewport" content=
+  "width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Load any supplemental Javascript libraries here -->
+<script src=
+  "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src=
+  "https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.2/seedrandom.js">
+</script>
+<script src="candy.js"></script>
+<script src="board.js"></script>
+<script src="rules.js"></script>
+
+<script>
+
+// By default, the first board loaded by your page will be the same 
+// each time you load (which is accomplished by "seeding" the random
+// number generator. This makes testing (and grading!) easier!
+Math.seedrandom(0);
+
+
+// A short jQuery extension to read query parameters from the URL.
+$.extend({
+  getUrlVars: function() {
+    var vars = [], pair;
+    var pairs = window.location.search.substr(1).split('&');
+    for (var i = 0; i < pairs.length; i++) {
+      pair = pairs[i].split('=');
+      vars.push(pair[0]);
+      vars[pair[0]] = pair[1] &&
+          decodeURIComponent(pair[1].replace(/\+/g, ' '));
+    }
+    return vars;
+  },
+  getUrlVar: function(name) {
+    return $.getUrlVars()[name];
+  }
+});
+
+// constants
+var DEFAULT_BOARD_SIZE = 8; //Set size to 8
+var BOARD_SIZE;
+    
+var Map = {'a':0, 'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7, 'i':8, 'j':9,'k':10, 'l':11, 'm':12, 'n':13,
+                 'o':14, 'p':15, 'q':16, 'r':17, 's':18, 't':19, 'u':20, 'v':21, 'w':22, 'x':23, 'y':24, 'z':25};
+    
+var FourWayDirections = ["up", "left", "right", "down"];
+
+var candiesA_Z = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's','t', 'u', 'v', 'w', 'x', 'y','z']; //Candies A to Z
+    
+
+// data model at global scope for easier debugging
+var board;
+var rules;
+
+// initialize board
+    if ($.getUrlVar('size') && $.getUrlVar('size') >= 3 && $.getUrlVar('size') <= 20) 
+{
+  board = new Board($.getUrlVar('size'));
+  BOARD_SIZE = $.getUrlVar('size'); //Calling the board size directly
+    
+    
+} 
+    else {
+  board = new Board(DEFAULT_BOARD_SIZE);
+  BOARD_SIZE = DEFAULT_BOARD_SIZE;
+}
+
+// load a rule
+rules = new Rules(board);
+    
+
+
+var drawTable = function() //Draw Table function
+{
+  var mainTable = document.getElementById("mainTable"); //The element ID is mainTable
+  var tbl  = document.createElement('table');
+ 
+  tbl.id = "mainTable"; //Element ID to use for HTML
+ 
+  var columnNames = []; //Unrestricted arrays
+  for (var i = 0; i < BOARD_SIZE; i++) //For loop for pushing the candies in the columns 
+  {
+    columnNames.push(candiesA_Z[i]) //Push objects into vector
+  }
+  
+  for(var i = 0; i < BOARD_SIZE; i++) //For loop with bounded by board size
+  {
+      var iOffByOne = i + 1; //Variable to call offset by 1
+      var tr = tbl.insertRow(); 
+      tr.style.height = 320/BOARD_SIZE;
+      
+      for(var j = 0; j < BOARD_SIZE; j++) //For loop within the i incrementing loop
+      {
+        if (board.getCandyAt(i,j)) //If this condition is met, then add the following image
+        {
+          var colorCell = board.getCandyAt(i,j).color; 
+          var td = tr.insertCell(); //Insert into the given cell
+   
+          td.id = (columnNames[j].toString() + (iOffByOne).toString()); //The ID consists of a column string and the offset incremwent 
+          
+        
+          var img = document.createElement('img'); //Reconize the img to an element
+          img.id = columnNames[j].toString() + (iOffByOne).toString() + "image";
+          img.src = "graphics/" + colorCell.toString()+"-candy.png"; //The graphic is called by candy.png
+            
+          img.style.width = "60%"; //Setting the width to 60% percent
+          img.style.textAlign = "center"; //Center allignment
+          img.style.tableLayout = "fixed"; //The table layout is fixed
+          img.style.position = "relative"; //The position is relative
+          
+         
+         
+          td.appendChild(img); //Append the image to the given process
+        }
+        else
+        {
+          var td = tr.insertCell(); //Inserting the candy
+        }
+      }
+  }
+  mainTable.parentNode.replaceChild(tbl, mainTable); //Main table 
+}
+
+// Final initialization entry point: the Javascript code inside this block
+// runs at the end of start-up when the page has finished loading.
+$(document).ready(function()
+{
+  // Your code here.
+     rules.prepareNewGame(); //prepareNewGame
+    drawTable(); //Draw the table which the candies will be rendered
+  
+    
+});
+
+
+/* Event Handlers */
+// access the candy object with info.candy
+
+// add a candy to the board
+$(board).on('add', function(e, info)
+{
+  // Your code here.
+});
+
+// move a candy on the board
+$(board).on('move', function(e, info)
+{
+  // Your code here.
+});
+
+// remove a candy from the board
+$(board).on('remove', function(e, info)
+{
+  // Your code here.
+});
+
+// move a candy on the board
+$(board).on('scoreUpdate', function(e, info)
+{
+  // Your code here. To be implemented in pset 2.
+});
+
+// Button Events
+$(document).on('click', "#newGameButton", function(evt) //New Game event handling
+{
+  // Your code here.
+  board.clear();  //Reset the board and returns a new grid of randomized candies
+  rules.prepareNewGame(); //Prepare the game
+  drawTable();
+
+});
+
+// keyboard events arrive here
+$(document).on('keydown', function(evt) {
+  // Your code here.
+});
+
+
+</script>
+
+
+</head>
+
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4" id="firstColumn">
+      <div>
+      <!-- Column 1 Code Here -->
+      <p class= "gameName"> Candy </p>
+    <br/>
+      <p class= "gameName"> Crush </p>
+    <br/>
+          
+    </div>
+      <input class = "btn" type = "button" id="newGameButton" value = "New Game"></input>
+      <br/>
+
+     
+  </div>
+
+    <div class="col-md-4" id="mainColumn">
+
+      <!-- Column 2 Code Here -->
+      <table id= "mainTable" width="320px" height="320px"></table>
+      <div class = "center" id = "someCenter">
+        <canvas id="myCanvas" width="320px" height="320px"></canvas>
+          
+          </div>
+      <div class = "center" id = "someCenter" style = "z-index: 3">
+        <table id="invisibleTable"></table>
+      </div>
+        
+    
+
+    </div>
+
+    <div class="col-md-4" id="lastColumn">
+
+      <!-- Column 3 Code Here -->
+        
+        <form>
+        
+            MOVE:<br>
+            <input type="text" name="firstname"<br>
+        
+        </form>
+   
+        <input class = "btn" type = "button" id="upButton" value = "UP"></input>
+      <br/>
+    
+        <input class = "btn" type = "button" id="leftButton" value = "LEFT"></input>
+      <br/>
+    
+        <input class = "btn" type = "button" id="rightButton" value = "RIGHT"></input>
+      <br/>
+
+        <input class = "btn" type = "button" id="downButton" value = "DOWN"></input>
+      <br/>
+
+        <input class = "btn" type = "button" id="downButton" value = "Crush Once"></input>
+      <br/>
+
+       </div>
+      
+        
+           </div>
+      
+
+    </div>
+  </div> <!-- class="row" -->
+</div> <!-- class="container" -->
+
+</body>
+
+</html>
